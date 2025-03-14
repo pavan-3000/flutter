@@ -25,7 +25,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.29.1  # Change this based on your Flutter version
+          flutter-version-file: .flutter-version # Auto-detect version if using `fvm`
           channel: stable
 
       - name: Cache Flutter Dependencies
@@ -36,19 +36,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-flutter-
 
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Clean Build Artifacts
         run: flutter clean
-
-      - name: Enable Desugaring in Gradle
-        run: |
-          echo "android {
-            compileOptions {
-              coreLibraryDesugaringEnabled true
-            }
-          }" >> android/app/build.gradle
 
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
@@ -58,3 +58,4 @@ jobs:
         with:
           name: app-release
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 5 # Optional: Set retention period
