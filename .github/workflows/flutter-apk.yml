@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17' # ✅ Use Java 17 for Android Gradle
+          java-version: '17' # ✅ Ensure Java 17 is installed
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -50,12 +50,17 @@ jobs:
       - name: Clean Build Artifacts
         run: flutter clean
 
-      - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
+      - name: Grant Execute Permissions to Gradle
+        run: chmod +x android/gradlew
+
+      - name: Build APK using Gradle
+        run: |
+          cd android
+          ./gradlew assembleRelease
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 5
