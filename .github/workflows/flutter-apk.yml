@@ -1,4 +1,4 @@
-name: Flutter APK Build
+name: Flutter CI
 
 on:
   push:
@@ -9,61 +9,27 @@ on:
       - main
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java (Ensure Java 17 is used)
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17' # ✅ Use Java 17 for Android Gradle
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 3.29.1 # Replace with the correct version
-          channel: stable
+          flutter-version: 'stable'
 
-      - name: Cache Flutter Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-
+      - name: Clean project
+        run: flutter clean
 
-      - name: Cache Gradle Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.gradle/caches
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      - name: Install Dependencies
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Ensure Gradle Wrapper Exists
+      - name: Setup Gradle Wrapper
         run: |
           cd android
           ./gradlew wrapper
 
-      - name: Make Gradle Wrapper Executable
-        run: chmod +x android/gradlew
-
-      - name: Clean Build Artifacts
-        run: flutter clean
-
       - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 5
+        run: flutter build apk
