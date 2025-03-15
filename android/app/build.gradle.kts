@@ -1,4 +1,3 @@
-
 import org.gradle.api.JavaVersion
 
 plugins {
@@ -13,38 +12,32 @@ plugins {
 
 android {
     namespace = "com.example.wesalvator"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"
+    compileSdk = flutter.compileSdk!! // Ensure it's properly resolved
+
+    defaultConfig {
+        applicationId = "com.example.wesalvator"
+        minSdk = 23
+        targetSdk = flutter.targetSdk!! // Ensure proper resolution
+        versionCode = flutter.versionCode!!
+        versionName = flutter.versionName!!
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug // ✅ Fix signing config
+        }
+    }
 
     compileOptions {
-    sourceCompatibility.set(JavaVersion.VERSION_17)
-    targetCompatibility.set(JavaVersion.VERSION_17)
-}
-
-
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 
     kotlinOptions {
         jvmTarget = "17"
     }
 
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.wesalvator"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-    }
-
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
-        }
-    }
+    ndkVersion = "27.0.12077973" // ✅ Move it to the correct position
 }
 
 flutter {
